@@ -73,10 +73,10 @@ public class RNXRPCClient {
     /**
      * emit a event to js.
      *
-     * @param event
-     * @param context
-     * @param args
-     * @param kwargs
+     * @param event event name
+     * @param context context info
+     * @param args args
+     * @param kwargs kwargs
      */
     public void emit(final String event, final Bundle context, final Object[] args, final Bundle kwargs) {
         if (reactContext == null) {
@@ -99,7 +99,7 @@ public class RNXRPCClient {
      * subscribe js event.
      *
      * @param event event event.
-     * @return
+     * @return event observable
      */
     public Observable<Event> sub(final String event) {
         return RNXRPCModule.event().filter(new Func1<Event, Boolean>() {
@@ -117,11 +117,11 @@ public class RNXRPCClient {
     /**
      * call a js procedure.
      *
-     * @param proc
-     * @param context
-     * @param args
-     * @param kwargs
-     * @return
+     * @param proc procedure name
+     * @param context context info
+     * @param args args
+     * @param kwargs kwargs
+     * @return result promise
      */
     public Promise<Reply> call(final String proc, final Bundle context, final Object[] args, final Bundle kwargs) {
         // TODO: add a call builder to build the context, args and kwargs.
@@ -156,8 +156,8 @@ public class RNXRPCClient {
     /**
      * register a procedure for js to call.
      *
-     * @param proc
-     * @return
+     * @param proc procedure name
+     * @return request observable
      */
     public Observable<Request> register(final String proc) {
         return Observable.create(new OnSubscribe<Request>() {
