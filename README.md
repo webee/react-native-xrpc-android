@@ -14,6 +14,6 @@ To install the library add:
         maven { url "https://jitpack.io" }
    }
    dependencies {
-         compile 'com.github.webee:react-native-utils-android:v0.4.0'
+         compile 'com.github.webee:react-native-utils-android:v0.6.0'
    }
    ```
