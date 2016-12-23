@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 /**
- * 包含ReactInstanceManager和xrpc, 及新建关联xrpc的方法
+ * 包含ReactInstanceManager和xrpc, 及新建关联的
  */
 public class RNX {
     private static Map<String, RNX> rnxes = new ConcurrentHashMap<>();
@@ -53,6 +53,10 @@ public class RNX {
         }
     }
 
+    public String id() {
+        return id;
+    }
+
     public ReactInstanceManager inst() {
         return instanceManager;
     }
@@ -76,10 +80,6 @@ public class RNX {
 
     public RNXRPCClient newXrpc() {
         return new RNXRPCClient(instanceManager);
-    }
-
-    public String id() {
-        return id;
     }
 
     /**

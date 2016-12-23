@@ -165,8 +165,10 @@ public class RNXRPCClient {
         return Observable.create(new OnSubscribe<Request>() {
             @Override
             public void call(Subscriber<? super Request> subscriber) {
-                if (subscriber.isUnsubscribed()) return;
                 procedures.put(proc, subscriber);
+                if (subscriber.isUnsubscribed()) {
+                    procedures.remove(proc);
+                }
             }
         });
     }
