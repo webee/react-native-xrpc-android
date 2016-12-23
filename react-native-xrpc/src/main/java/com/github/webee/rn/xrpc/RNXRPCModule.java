@@ -89,6 +89,10 @@ public class RNXRPCModule extends ReactContextBaseJavaModule {
         }
     }
 
+    public static Observable<Event> event() {
+        return eventSubject.asObservable();
+    }
+
     private void handleEvent(ReadableArray xargs) {
         String event = xargs.getString(0);
         ReadableArray args = xargs.getArray(1);
@@ -121,9 +125,5 @@ public class RNXRPCModule extends ReactContextBaseJavaModule {
         ReadableMap kwargs = xargs.getMap(3);
 
         replyDeferred.reject(new XRPCError(error, args, kwargs));
-    }
-
-    public static Observable<Event> event() {
-        return eventSubject.asObservable();
     }
 }

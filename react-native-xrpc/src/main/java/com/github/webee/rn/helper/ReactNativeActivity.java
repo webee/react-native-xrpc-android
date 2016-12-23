@@ -22,6 +22,7 @@ import rx.schedulers.Schedulers;
 public class ReactNativeActivity extends AppCompatActivity implements DefaultHardwareBackBtnHandler {
     public static final String APP_INST_ID_PROP = "appInstID";
     public static final String APP_EXIT_EVENT = "native.app.exit";
+    public static final String EXTRA_RNX_ID = ReactNativeActivity.class.getName() + ".RNX_ID";
     public static final String EXTRA_MODULE_NAME = ReactNativeActivity.class.getName() + ".MODULE_NAME";
     public static final String EXTRA_LAUNCH_OPTIONS = ReactNativeActivity.class.getName() + ".LAUNCH_OPTIONS";
     private String appInstID;
@@ -31,7 +32,12 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
 
 
     public static Intent getStartIntent(Context context, String moduleName, Bundle launchOptions) {
+        return getStartIntent(context, RN.rnx().id(), moduleName, launchOptions);
+    }
+
+    public static Intent getStartIntent(Context context, String rnxID, String moduleName, Bundle launchOptions) {
         Intent intent = new Intent(context, ReactNativeActivity.class);
+        intent.putExtra(EXTRA_RNX_ID, rnxID);
         intent.putExtra(EXTRA_MODULE_NAME, moduleName);
         intent.putExtra(EXTRA_LAUNCH_OPTIONS, launchOptions);
         return intent;
@@ -42,8 +48,13 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
         super.onCreate(savedInstanceState);
 
         appInstID = UUID.randomUUID().toString();
+
+        final Intent intent = getIntent();
+        String rnxID = intent.getStringExtra(EXTRA_RNX_ID);
+        RNX rnx = RNX.get(rnxID);
+
         // subscribe exit app event.
-        appExitSub = RN.xrpc().sub(APP_EXIT_EVENT)
+        appExitSub = rnx.xrpc().sub(APP_EXIT_EVENT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Event>() {
@@ -68,9 +79,8 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
                         }
                     }
                 });
-        instanceManager = RN.inst();
+        instanceManager = rnx.inst();
 
-        final Intent intent = getIntent();
         String moduleName = intent.getStringExtra(EXTRA_MODULE_NAME);
         Bundle launchOptions = intent.getBundleExtra(EXTRA_LAUNCH_OPTIONS);
         if (launchOptions == null) {

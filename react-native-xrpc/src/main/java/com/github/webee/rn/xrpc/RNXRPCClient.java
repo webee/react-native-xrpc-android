@@ -1,6 +1,7 @@
 package com.github.webee.rn.xrpc;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.Arguments;
@@ -44,6 +45,7 @@ public class RNXRPCClient {
             @Override
             public void onReactContextInitialized(ReactContext context) {
                 reactContext = context;
+                Log.i("XRPC", "react context initialized");
                 for (XRPCArgs args : eventArgs) {
                     if (args instanceof EmitArgs) {
                         EmitArgs ea = (EmitArgs) args;

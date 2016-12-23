@@ -5,8 +5,6 @@ import android.os.Bundle;
 
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
-import com.facebook.react.common.LifecycleState;
-import com.facebook.react.shell.MainReactPackage;
 import com.github.webee.rn.xrpc.RNXRPCClient;
 
 import java.util.List;
@@ -16,32 +14,22 @@ import java.util.List;
  */
 
 public class RN {
-    private static ReactInstanceManager instanceManager;
-    private static RNXRPCClient xrpc;
+    private static RNX rnx;
 
     public static void setup(Application application, boolean isDev, List<ReactPackage> extraPackages) {
-        ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
-                .setApplication(application)
-                .setUseDeveloperSupport(isDev)
-                .setBundleAssetName("index.android.jsbundle")
-                .setJSMainModuleName("index.android")
-                .setInitialLifecycleState(LifecycleState.RESUMED)
-                .addPackage(new MainReactPackage());
-                //.setUseOldBridge(true) // uncomment this line if your app crashes
-        for (ReactPackage pk : extraPackages) {
-            builder = builder.addPackage(pk);
-        }
-
-        instanceManager = builder.build();
-        xrpc = new RNXRPCClient(instanceManager);
+        rnx = new RNX(application, "", isDev, extraPackages);
     }
 
     public static void start() {
-        instanceManager.createReactContextInBackground();
+        rnx.start();
+    }
+
+    public static RNX rnx() {
+        return rnx;
     }
 
     public static ReactInstanceManager inst() {
-        return instanceManager;
+        return rnx.inst();
     }
 
     /**
@@ -49,7 +37,7 @@ public class RN {
      * @return
      */
     public static RNXRPCClient xrpc() {
-        return xrpc;
+        return rnx.xrpc();
     }
 
     /**
@@ -58,10 +46,10 @@ public class RN {
      * @return
      */
     public static RNXRPCClient newXrpc(Bundle context) {
-        return new RNXRPCClient(instanceManager, context);
+        return rnx.newXrpc(context);
     }
 
     public static RNXRPCClient newXrpc() {
-        return new RNXRPCClient(instanceManager);
+        return rnx.newXrpc();
     }
 }
