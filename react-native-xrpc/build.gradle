@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.webee'
-version='0.6.0'
+version='0.6.3'
 
 android {
     compileSdkVersion 24
