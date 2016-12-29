@@ -28,6 +28,10 @@ public class RNX {
     private ReactInstanceManager instanceManager;
     private RNXRPCClient xrpc;
 
+    public RNX(Application application, String name, boolean isDev, List<ReactPackage> extraPackages) {
+        this(application, name, isDev, extraPackages, null);
+    }
+
     public RNX(Application application, String name, boolean isDev, List<ReactPackage> extraPackages, String jsBundleFile) {
         ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
                 .setApplication(application)
