@@ -17,7 +17,10 @@ public class RN {
     private static RNX rnx;
 
     public static void setup(Application application, boolean isDev, List<ReactPackage> extraPackages) {
-        rnx = new RNX(application, "", isDev, extraPackages);
+        rnx = new RNX(application, "", isDev, extraPackages, null);
+    }
+    public static void setup(Application application, boolean isDev, List<ReactPackage> extraPackages, String jsBundlePath) {
+        rnx = new RNX(application, "", isDev, extraPackages, jsBundlePath);
     }
 
     public static void start() {

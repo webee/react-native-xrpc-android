@@ -2,6 +2,7 @@ package com.github.webee.rn.helper;
 
 import android.app.Application;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
@@ -27,7 +28,7 @@ public class RNX {
     private ReactInstanceManager instanceManager;
     private RNXRPCClient xrpc;
 
-    public RNX(Application application, String name, boolean isDev, List<ReactPackage> extraPackages) {
+    public RNX(Application application, String name, boolean isDev, List<ReactPackage> extraPackages, String jsBundleFile) {
         ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
                 .setApplication(application)
                 .setUseDeveloperSupport(isDev)
@@ -36,6 +37,10 @@ public class RNX {
                 .setInitialLifecycleState(LifecycleState.RESUMED)
                 .addPackage(new MainReactPackage());
                 //.setUseOldBridge(true) // uncomment this line if your app crashes
+
+        if (!TextUtils.isEmpty(jsBundleFile))
+            builder.setJSBundleFile(jsBundleFile);
+
         for (ReactPackage pk : extraPackages) {
             builder = builder.addPackage(pk);
         }
