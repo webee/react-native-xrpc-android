@@ -33,6 +33,7 @@ public class RNXRPCClient {
     private Bundle defaultContext;
     private List<XRPCArgs> eventArgs = new LinkedList<>();
     public static final Map<String, Deferred<Reply>> requests = new ConcurrentHashMap<>();
+    public static final Map<String, Subscriber<? super Reply>> observableRequests = new ConcurrentHashMap<>();
     public static final Map<String, Subscriber<? super Request>> procedures = new ConcurrentHashMap<>();
 
     public RNXRPCClient(ReactInstanceManager instanceManager) {
@@ -135,6 +136,34 @@ public class RNXRPCClient {
         doCall(rid, proc, context, args, kwargs);
 
         return deferred.promise;
+    }
+
+    public Observable<Reply> subCall(final String proc, final Object[] args, final Bundle kwargs) {
+        return subCall(proc, defaultContext, args, kwargs);
+    }
+
+    /**
+     * call a js continuous emitting procedure.
+     *
+     * @param proc procedure name
+     * @param context context info
+     * @param args args
+     * @param kwargs kwargs
+     * @return result observable
+     */
+    public Observable<Reply> subCall(final String proc, final Bundle context, final Object[] args, final Bundle kwargs) {
+        // TODO: add a call builder to build the context, args and kwargs.
+        return Observable.create(new OnSubscribe<Reply>() {
+            @Override
+            public void call(Subscriber<? super Reply> subscriber) {
+                String rid = UUID.randomUUID().toString();
+                observableRequests.put(rid, subscriber);
+                if (subscriber.isUnsubscribed()) {
+                    observableRequests.remove(rid);
+                }
+                doCall(rid, proc, context, args, kwargs);
+            }
+        });
     }
 
     private void doCall(final String rid, final String proc, final Bundle context, final Object[] args, final Bundle kwargs) {

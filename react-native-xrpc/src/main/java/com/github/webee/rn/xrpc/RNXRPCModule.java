@@ -19,6 +19,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.subjects.PublishSubject;
 
+import static com.github.webee.rn.xrpc.RNXRPCClient.observableRequests;
 import static com.github.webee.rn.xrpc.RNXRPCClient.requests;
 
 @ReactModule(name = "XRPC")
@@ -102,28 +103,58 @@ public class RNXRPCModule extends ReactContextBaseJavaModule {
 
     private void handleCallReply(ReadableArray xargs) {
         String rid = xargs.getString(0);
-        Deferred<Reply> replyDeferred = requests.remove(rid);
-        if (replyDeferred == null) {
-            return;
+        boolean hasNext = false;
+        if (xargs.size() >= 4) {
+            hasNext = xargs.getBoolean(3);
         }
 
-        ReadableArray args = xargs.getArray(1);
-        ReadableMap kwargs = xargs.getMap(2);
+        // handle promise.
+        Deferred<Reply> replyDeferred = requests.remove(rid);
+        if (replyDeferred != null && !hasNext) {
+            ReadableArray args = xargs.getArray(1);
+            ReadableMap kwargs = xargs.getMap(2);
 
-        replyDeferred.fulfill(new Reply(args, kwargs));
+            replyDeferred.fulfill(new Reply(args, kwargs));
+        }
+
+        // handle observable.
+        Subscriber<? super Reply> replySubscriber = observableRequests.get(rid);
+        if (replySubscriber != null) {
+            ReadableArray args = xargs.getArray(1);
+            ReadableMap kwargs = xargs.getMap(2);
+
+            if (!hasNext) {
+                replySubscriber = observableRequests.remove(rid);
+            }
+
+            replySubscriber.onNext(new Reply(args, kwargs));
+            if (!hasNext) {
+                replySubscriber.onCompleted();
+            }
+        }
     }
 
     private void handleCallReplyError(ReadableArray xargs) {
         String rid = xargs.getString(0);
+
+        // handle promise.
         Deferred<Reply> replyDeferred = requests.remove(rid);
-        if (replyDeferred == null) {
-            return;
+        if (replyDeferred != null) {
+            String error = xargs.getString(1);
+            ReadableArray args = xargs.getArray(2);
+            ReadableMap kwargs = xargs.getMap(3);
+
+            replyDeferred.reject(new XRPCError(error, args, kwargs));
         }
 
-        String error = xargs.getString(1);
-        ReadableArray args = xargs.getArray(2);
-        ReadableMap kwargs = xargs.getMap(3);
+        // handle observable.
+        Subscriber<? super Reply> replySubscriber = observableRequests.remove(rid);
+        if (replySubscriber != null) {
+            String error = xargs.getString(1);
+            ReadableArray args = xargs.getArray(2);
+            ReadableMap kwargs = xargs.getMap(3);
 
-        replyDeferred.reject(new XRPCError(error, args, kwargs));
+            replySubscriber.onError(new XRPCError(error, args, kwargs));
+        }
     }
 }
