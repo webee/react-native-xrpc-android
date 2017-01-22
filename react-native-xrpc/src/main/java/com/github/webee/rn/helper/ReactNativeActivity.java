@@ -96,7 +96,14 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
     @Override
     public void onDestroy() {
         super.onDestroy();
-        appExitSub.unsubscribe();
+        if (mReactRootView != null) {
+            mReactRootView.unmountReactApplication();
+            mReactRootView = null;
+        }
+        if (appExitSub != null) {
+            appExitSub.unsubscribe();
+            appExitSub = null;
+        }
     }
 
     @Override
