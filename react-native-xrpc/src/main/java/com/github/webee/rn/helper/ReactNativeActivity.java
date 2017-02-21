@@ -25,6 +25,7 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
     public static final String EXTRA_RNX_ID = ReactNativeActivity.class.getName() + ".RNX_ID";
     public static final String EXTRA_MODULE_NAME = ReactNativeActivity.class.getName() + ".MODULE_NAME";
     public static final String EXTRA_LAUNCH_OPTIONS = ReactNativeActivity.class.getName() + ".LAUNCH_OPTIONS";
+    private String rnxID;
     private String appInstID;
     private Subscription appExitSub;
     private ReactRootView mReactRootView;
@@ -50,10 +51,27 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
         appInstID = UUID.randomUUID().toString();
 
         final Intent intent = getIntent();
-        String rnxID = intent.getStringExtra(EXTRA_RNX_ID);
+        rnxID = intent.getStringExtra(EXTRA_RNX_ID);
         RNX rnx = RNX.get(rnxID);
 
         // subscribe exit app event.
+        subAppExitEvent();
+        instanceManager = rnx.inst();
+
+        String moduleName = intent.getStringExtra(EXTRA_MODULE_NAME);
+        Bundle launchOptions = intent.getBundleExtra(EXTRA_LAUNCH_OPTIONS);
+        if (launchOptions == null) {
+            launchOptions = new Bundle();
+        }
+        launchOptions.putString(APP_INST_ID_PROP, appInstID);
+        mReactRootView = new ReactRootView(this);
+        mReactRootView.startReactApplication(instanceManager, moduleName, launchOptions);
+
+        setContentView(mReactRootView);
+    }
+
+    private void subAppExitEvent() {
+        RNX rnx = RNX.get(rnxID);
         appExitSub = rnx.xrpc().sub(APP_EXIT_EVENT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -79,18 +97,14 @@ public class ReactNativeActivity extends AppCompatActivity implements DefaultHar
                         }
                     }
                 });
-        instanceManager = rnx.inst();
+    }
 
-        String moduleName = intent.getStringExtra(EXTRA_MODULE_NAME);
-        Bundle launchOptions = intent.getBundleExtra(EXTRA_LAUNCH_OPTIONS);
-        if (launchOptions == null) {
-            launchOptions = new Bundle();
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (appExitSub != null && appExitSub.isUnsubscribed()) {
+            subAppExitEvent();
         }
-        launchOptions.putString(APP_INST_ID_PROP, appInstID);
-        mReactRootView = new ReactRootView(this);
-        mReactRootView.startReactApplication(instanceManager, moduleName, launchOptions);
-
-        setContentView(mReactRootView);
     }
 
     @Override
